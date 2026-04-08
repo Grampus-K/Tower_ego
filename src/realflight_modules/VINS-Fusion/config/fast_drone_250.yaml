@@ -1,0 +1,80 @@
+%YAML:1.0
+
+#common parameters
+#support: 1 imu 1 cam; 1 imu 2 cam: 2 cam; 
+imu: 1         
+num_of_cam: 2
+
+
+imu_topic: "/mavros/imu/data_raw"
+image0_topic: "/cam_front/infra1/image_rect_raw"
+image1_topic: "/cam_front/infra2/image_rect_raw"
+
+
+
+
+output_path: "/home/ego-test/vins_output"
+
+
+cam0_calib: "left.yaml"
+cam1_calib: "right.yaml"
+image_width: 640
+image_height: 480
+   
+
+# Extrinsic parameter between IMU and Camera.
+estimate_extrinsic: 1   # 0  Have an accurate extrinsic parameters. We will trust the following imu^R_cam, imu^T_cam, don't change it.
+                        # 1  Have an initial guess about extrinsic parameters. We will optimize around your initial guess.
+
+body_T_cam0: !!opencv-matrix
+   rows: 4
+   cols: 4
+   dt: d
+   data: [ -1.3752396676877332e-02, -3.7391314408180276e-02,
+       9.9920606543018464e-01, 6.9924622666595063e-02,
+       -9.9989147840541759e-01, -4.7648717953219233e-03,
+       -1.3940136620645249e-02, 3.3281990126025243e-02,
+       5.2823288301583893e-03, -9.9928934028318483e-01,
+       -3.7321728236073382e-02, -3.4475351782935496e-02, 0., 0., 0., 1. ]
+body_T_cam1: !!opencv-matrix
+   rows: 4
+   cols: 4
+   dt: d
+   data: [ -1.3951816022324426e-02, -3.6753113431889695e-02,
+       9.9922697896060741e-01, 6.5924540830914535e-02,
+       -9.9988848176046363e-01, -4.8105349405167530e-03,
+       -1.4137991241384373e-02, -1.6441912668758444e-02,
+       5.3264314915906219e-03, -9.9931279757974134e-01,
+       -3.6681899090923231e-02, -3.4161708896440074e-02, 0., 0., 0., 1. ]
+#Multiple thread support
+multiple_thread: 1
+
+#feature traker paprameters
+max_cnt: 150            # max feature number in feature tracking
+min_dist: 30            # min distance between two features 
+freq: 10                # frequence (Hz) of publish tracking result. At least 10Hz for good estimation. If set 0, the frequence will be same as raw image 
+F_threshold: 1.0        # ransac threshold (pixel)
+show_track: 1           # publish tracking image as topic
+flow_back: 1            # perform forward and backward optical flow to improve feature tracking accuracy
+
+#optimization parameters
+max_solver_time: 0.04  # max solver itration time (ms), to guarantee real time
+max_num_iterations: 8   # max solver itrations, to guarantee real time
+keyframe_parallax: 10.0 # keyframe selection threshold (pixel)
+
+#imu parameters       The more accurate parameters you provide, the better performance
+acc_n: 0.0754482936      # accelerometer measurement noise standard deviation. #0.2   0.04  0.0754482936
+gyr_n: 0.0064101634         # gyroscope measurement noise standard deviation.     #0.05  0.004  0.0064101634
+acc_w: 0.0022583364         # accelerometer bias random work noise standard deviation.  #0.002  0.0022583364
+gyr_w: 0.000165265       # gyroscope bias random work noise standard deviation.     #4.0e-5  0.000165265
+g_norm: 9.805         # gravity magnitude
+
+#unsynchronization parameters
+estimate_td: 1                      # online estimate time offset between camera and imu
+td: -0.05                             # initial value of time offset. unit: s. readed image clock + td = real image clock (IMU clock)
+
+#loop closure parameters
+load_previous_pose_graph: 0        # load and reuse previous pose graph; load from 'pose_graph_save_path'
+pose_graph_save_path: "/home/fast/savedfiles/output/pose_graph/" # save and load path
+save_image: 1                   # save image in pose graph for visualization prupose; you can close this function by setting 0 
+
